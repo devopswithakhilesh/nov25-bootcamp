@@ -69,3 +69,12 @@ psql -h nov25-class5.cvik8accw2tk.ap-south-1.rds.amazonaws.com -p 5432 -U postgr
 
 
 docker run -e DATABASE_URL=postgresql://postgres:Admin123@nov25-class5.cvik8accw2tk.ap-south-1.rds.amazonaws.com:5432/postgres  -td -p 5000:5000 879381241087.dkr.ecr.ap-south-1.amazonaws.com/nov25-class5:2.0
+
+
+
+
+DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+mkdir -p $DOCKER_CONFIG/cli-plugins
+curl -SL https://github.com/docker/compose/releases/download/v5.0.0/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+
+chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
