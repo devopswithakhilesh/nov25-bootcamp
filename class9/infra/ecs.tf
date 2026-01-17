@@ -12,12 +12,24 @@ resource "aws_ecs_task_definition" "app" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "512"
   memory                   = "1024"
-  execution_role_arn      = "arn:aws:iam::879381241087:role/formyecsfailingssue"
+  execution_role_arn      = aws_iam_role.ecs_task_execution_role.arn
+
+  # task role -> prmissions the running contanrs will have
+  # execuation role -> permissions for ecs agent to pull images and send logs
 
   container_definitions = jsonencode([
     {
       name  = "student-portal-container"
       image = "879381241087.dkr.ecr.ap-south-1.amazonaws.com/nov25-class5:3.0"
+
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/student-portal",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
       "environment" : [
         { "name" : "DATABASE_URL", "value" : "postgresql://${aws_db_instance.default.username}:${random_password.rds_password.result}@${aws_db_instance.default.address}:5432/${aws_db_instance.default.db_name}" },
       ],
@@ -53,6 +65,8 @@ resource "aws_ecs_service" "app_service" {
     container_name   = "student-portal-container"
     container_port   = 5000
   }
+
+  depends_on = [ aws_db_instance.default ]
 }
 
 
@@ -67,7 +81,7 @@ resource "aws_iam_role" "ecs_task_execution_role" {
             Action = "sts:AssumeRole"
             Effect = "Allow"
             Principal = {
-            Service = "ec2.amazonaws.com"
+            Service = "ecs-tasks.amazonaws.com"
             }
         }
         ]
@@ -80,29 +94,21 @@ resource "aws_iam_role" "ecs_task_execution_role" {
         name   = "student-portal-ecsTaskExecutionPolicy"
         role   = aws_iam_role.ecs_task_execution_role.id
         policy = jsonencode({
-            Version = "2012-10-17"
-            Statement = [
-                {
-                    Effect = "Allow"
-                    Action = [
-                        "ecr:GetAuthorizationToken",
-                        "ecr:BatchGetImage",
-                        "ecr:GetDownloadUrlForLayer",
-                        "ecr:BatchCheckLayerAvailability"
-                    ]
-                    Resource = "*"
-                },
-                {
-                    Effect = "Allow"
-                    Action = [
-                        "logs:CreateLogGroup",
-                        "logs:CreateLogStream",
-                        "logs:PutLogEvents"
-                    ]
-                    Resource = "arn:aws:logs:*:*:*"
-                }
-            ]
-        })
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        }
+    ]
+})
     }
 
- 

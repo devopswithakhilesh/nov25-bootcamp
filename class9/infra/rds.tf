@@ -12,6 +12,11 @@ resource "aws_db_instance" "default" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
 }
 
+# password 
+# user aws_db_instance.default.username
+# host aws_db_instance.default.address
+# port aws_db_instance.default.port
+# database_name aws_db_instance.default.db_name
 
 # subnet group for rds -> list of subnets to use
 resource "aws_db_subnet_group" "rds_subnet_group" {
