@@ -9,7 +9,7 @@ resource "aws_lb" "app_alb" {
 
 resource "aws_lb_target_group" "app_tg" {
   name        = "student-portal-tg"
-  port        = 5000
+  port        = var.container_port
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
@@ -19,7 +19,7 @@ resource "aws_lb_target_group" "app_tg" {
     unhealthy_threshold = 2
     timeout             = 3
     interval            = 20
-    path                = "/"
+    path                = var.health_check_path
     matcher             = "200"
   }
 }

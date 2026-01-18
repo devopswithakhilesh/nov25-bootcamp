@@ -17,7 +17,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name  = "student-portal-container"
-      image = "879381241087.dkr.ecr.ap-south-1.amazonaws.com/nov25-class5:3.0"
+      image = "${var.image}:${var.tag}"
 
       "logConfiguration" : {
         "logDriver" : "awslogs",
@@ -33,8 +33,8 @@ resource "aws_ecs_task_definition" "app" {
       essential = true
       portMappings = [
         {
-          containerPort = 5000
-          hostPort      = 5000
+          containerPort = var.container_port
+          hostPort      = var.container_port
         protocol = "tcp" }
       ]
     }
