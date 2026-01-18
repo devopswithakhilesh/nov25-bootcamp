@@ -1,4 +1,4 @@
-name: docker build push
+name: class12 deploy
 
 on:
   workflow_dispatch:
@@ -7,10 +7,17 @@ env:
   ecr_repo: student-portal
   aws_region: ap-south-1
   path: class11-12/src
+  tag: ${{ github.sha }}
+  ECS_APP_CONTAINER_NAME: student-portal-container
+  ECS_TASK_DEFINITION: student-portal-task
+  ECS_SERVICE: student-portal-service
+  ECS_CLUSTER: student-portal-cluster
+
+
 
 
 jobs:
-  image-build-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,3 +42,23 @@ jobs:
           docker build -t ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ env.ecr_repo}}:latest .
           docker push ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ env.ecr_repo}}:latest
           
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws_region }
+
+  
+      # download ecs task definition
+
+      # update the tag
