@@ -28,7 +28,7 @@ resource "aws_ecs_task_definition" "app" {
         }
       }
       "environment" : [
-        { "name" : "DATABASE_URL", "value" : "postgresql://${aws_db_instance.default.username}:${random_password.rds_password.result}@${aws_db_instance.default.address}:5432/${aws_db_instance.default.db_name}" },
+        { "name" : "DB_LINK", "value" : "postgresql://${aws_db_instance.default.username}:${random_password.rds_password.result}@${aws_db_instance.default.address}:5432/${aws_db_instance.default.db_name}" },
       ],
       essential = true
       portMappings = [
