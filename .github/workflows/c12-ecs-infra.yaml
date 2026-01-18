@@ -1,6 +1,6 @@
 # terraform build
 
-Name: c12 Build ECS Infr
+name: c12 Build ECS Infr
 
 on:
   push:
