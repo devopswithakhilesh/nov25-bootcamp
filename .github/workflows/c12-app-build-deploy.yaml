@@ -79,7 +79,7 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: ${{ env.ECS_APP_CONTAINER_NAME }}
-          image: ${{ env.ecr_repo }}:${{ github.sha }}
+          image: ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ env.ecr_repo }}:${{ github.sha }}
 
       - name: Deploy app on Amazon ECS task definition
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -88,4 +88,4 @@ jobs:
           task-definition: ${{ steps.task-def-web.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+          wait-for-service-stability: false

@@ -2,7 +2,7 @@
 :root {
     --primary: #00FFFF;
     --secondary: #3498db;
-    --danger: #e74c3c;
+    --danger: #FF0000;
     --success: #2ecc71;
     --transition: all 0.3s ease;
   }
