@@ -209,3 +209,11 @@ __marimo__/
 
 *.pem
 *.env
+
+
+# Local Terraform files
+
+
+.terraform/*
+.terraform.lock.hcl
+.terraform/

@@ -1,6 +1,6 @@
 # ECS Cluster
 resource "aws_ecs_cluster" "main" {
-  name = "student-portal-cluster"
+  # name = "student-portal-cluster"
 }
 # ECS task definition
 resource "aws_ecs_task_definition" "app" {

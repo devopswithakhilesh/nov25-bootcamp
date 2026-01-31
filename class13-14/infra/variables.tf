@@ -45,3 +45,18 @@ variable "DB_DEFAULT_SETTING" {
     DB_CLUSTER_ENGINE_VERSION = "15.15"
   }
 }
+
+variable "aws_region" {
+  type    = string
+  default = "ap-south-1"
+}
+
+variable "domain_name" {
+  type    = string
+  default = "akhileshmishra.tech"
+}
+
+variable "subdomain" {
+  type    = string
+  default = "class15"
+}

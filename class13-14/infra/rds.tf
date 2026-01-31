@@ -99,3 +99,25 @@ resource "aws_rds_cluster_instance" "reader" {
 
 
 
+
+
+resource "aws_security_group" "rds" {
+  name        = "${var.environment}-rds-sg"
+  vpc_id      = aws_vpc.main.id
+  description = "allow inbound access from the ECS only"
+
+  ingress {
+    protocol        = "tcp"
+    from_port       = 5432
+    to_port         = 5432
+    cidr_blocks     = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.ecs_tasks_flask.id]
+  }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
