@@ -121,7 +121,7 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: ${{ matrix.service.ECS_APP_CONTAINER_NAME }}
-          image: ${{ matrix.service.ecr_repo }}:${{ github.sha }}
+          image: ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:${{ github.sha }}
 
       - name: Deploy app on Amazon ECS task definition
         if: ${{ github.ref == 'refs/heads/main' }}
