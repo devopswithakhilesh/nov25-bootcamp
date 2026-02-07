@@ -9,7 +9,7 @@ locals {
     { name           = "flask"
       cpu            = 512
       memory         = 1024
-      container_port = 5000
+      container_port = 8080
       # image               = ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.environment}-${var.app_name}-flask:latest
       container_name      = "flask"
       container_port_name = "flask"
