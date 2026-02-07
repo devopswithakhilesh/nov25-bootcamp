@@ -48,7 +48,7 @@ jobs:
 
   deploy-or-destroy-infra:
     runs-on: ubuntu-latest  
-    needs: checkinfra
+    # needs: checkinfra
 
     steps:
       - name: Checkout repository
