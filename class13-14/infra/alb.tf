@@ -16,7 +16,17 @@ resource "aws_lb" "app_alb" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.lb.id]
   subnets            = aws_subnet.public[*].id
+
+  access_logs {
+    bucket  = "logging-bucket-879381241087"
+    prefix  = "nov25/devsecops/class16/alb-logs"
+    enabled = true
+  }
 }
+
+
+
+
 
 resource "aws_lb_target_group" "app_tg" {
   name        = "${var.environment}-${var.app_name}-tg"
@@ -34,16 +44,17 @@ resource "aws_lb_target_group" "app_tg" {
     matcher             = "200"
   }
 }
-resource "aws_lb_listener" "app_listener" {
-  load_balancer_arn = aws_lb.app_alb.arn
-  port              = "80"
-  protocol          = "HTTP"
 
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app_tg.arn
-  }
-}
+# resource "aws_lb_listener" "app_listener" {
+#  load_balancer_arn = aws_lb.app_alb.arn
+#  port              = "80"
+#  protocol          = "HTTP"
+#
+#  default_action {
+#   type             = "forward"
+#    target_group_arn = aws_lb_target_group.app_tg.arn
+#  }
+#}
 
 # listenr for https
 resource "aws_lb_listener" "app_listener_https" {

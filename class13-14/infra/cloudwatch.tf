@@ -1,3 +1,4 @@
+# checkov:skip=CKV_AWS_338:Log retention is intentionally set to 1 day for development environments
 resource "aws_cloudwatch_log_group" "ecs" {
   for_each                 = local.ecs_services_interpreted
 

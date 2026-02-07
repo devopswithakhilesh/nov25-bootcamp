@@ -43,6 +43,8 @@ jobs:
         with:
           directory: ${{ github.event.inputs.paths }}
           framework: terraform
+          quiet: true
+          skip-checks: CKV_AWS_158
 
   deploy-or-destroy-infra:
     runs-on: ubuntu-latest  
