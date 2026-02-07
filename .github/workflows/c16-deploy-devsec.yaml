@@ -56,8 +56,7 @@ jobs:
           aws ecr get-login-password --region ${{ env.aws_region }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com
 
       - name: Build
-        run: |
-          docker build -t ${{ matrix.service.ecr_repo }} ${{ matrix.service.path }}
+        run: docker build -t ${{ matrix.service.ecr_repo }} ${{ matrix.service.path }}
           
       - name: scan image with trivy
         uses: aquasecurity/trivy-action@master
@@ -68,8 +67,9 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-          
+
       - name: Tag and push image to Amazon ECR
+        run: |
           docker tag  ${{ matrix.service.ecr_repo }} ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:${{ github.sha }} 
           docker tag  ${{ matrix.service.ecr_repo }} ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:latest
           docker push ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:${{ github.sha }}
