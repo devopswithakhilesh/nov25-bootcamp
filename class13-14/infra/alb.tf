@@ -17,11 +17,11 @@ resource "aws_lb" "app_alb" {
   security_groups    = [aws_security_group.lb.id]
   subnets            = aws_subnet.public[*].id
 
-  access_logs {
-    bucket  = "logging-bucket-879381241087"
-    prefix  = "nov25/devsecops/class16/alb-logs"
-    enabled = true
-  }
+  # access_logs {
+  # bucket  = "logging-bucket-879381241087"
+  #  prefix  = "nov25/devsecops/class16/alb-logs"
+  #  enabled = true
+  #}
 }
 
 
