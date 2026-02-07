@@ -95,3 +95,50 @@ resource "aws_ecs_service" "app_service" {
 
   depends_on = [aws_db_instance.default]
 }
+
+
+
+resource "aws_appautoscaling_target" "flask_app_target" {
+  max_capacity       = 5
+  min_capacity       = 1
+  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.app_service["flask"].name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+
+
+resource "aws_appautoscaling_policy" "flask_app_scale_up_cpu" {
+  name               = "${var.environment}-${var.app_name}-flask-scale-up-cpu"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.flask_app_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.flask_app_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.flask_app_target.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = 70
+    scale_in_cooldown  = 30
+    scale_out_cooldown = 30
+  }
+}
+
+# Flask App - Memory Scale Up Policy
+resource "aws_appautoscaling_policy" "flask_app_scale_up_memory" {
+  name               = "${var.environment}-${var.app_name}-flask-scale-up-memory"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.flask_app_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.flask_app_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.flask_app_target.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+    target_value       = 70
+    scale_in_cooldown  = 30
+    scale_out_cooldown = 30
+  }
+}
