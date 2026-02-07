@@ -1,0 +1,133 @@
+name: c16 app deploy devsecops
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      paths:
+        description: 'Path to app directory'
+        required: false
+        default: './class13-14/app/'
+
+env:
+  aws_region: ap-south-1
+  path: ./app
+  # repo: "${var.environment}-${var.app_name}-${each.key}"
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: flask
+            ecr_repo: ${{ github.event.inputs.environment }}-candycush-flask
+            path: ./class13-14/app/
+          - name: redis
+            ecr_repo: ${{ github.event.inputs.environment }}-candycush-redis
+            path: ./class13-14/app/redis/
+          - name: nginx
+            ecr_repo: ${{ github.event.inputs.environment }}-candycush-nginx
+            path: ./class13-14/app/nginx/
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws_region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region ${{ env.aws_region }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com
+
+      - name: Build, tag, and push image to Amazon ECR
+        run: |
+          docker build -t ${{ matrix.service.ecr_repo }} ${{ matrix.service.path }}
+          docker tag  ${{ matrix.service.ecr_repo }} ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:${{ github.sha }} 
+          docker tag  ${{ matrix.service.ecr_repo }} ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:latest
+          docker push ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:${{ github.sha }}
+          docker push ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      ECS_APP_CONTAINER_NAME: candycush-flask-container
+      ECS_TASK_DEFINITION: candycush-flask-task
+      ECS_SERVICE: candycush-flask-service
+      ECS_CLUSTER: candycush-cluster
+
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: flask
+            ecr_repo: ${{ github.event.inputs.environment }}-candycush-flask
+            ECS_APP_CONTAINER_NAME: flask
+            ECS_TASK_DEFINITION: ${{ github.event.inputs.environment }}-candycush-flask
+            ECS_SERVICE: ${{ github.event.inputs.environment }}-candycush-service-flask
+            ECS_CLUSTER: ${{ github.event.inputs.environment }}-candycush-cluster
+          - name: redis
+            ecr_repo: ${{ github.event.inputs.environment }}-candycush-redis
+            ECS_APP_CONTAINER_NAME: redis
+            ECS_TASK_DEFINITION: ${{ github.event.inputs.environment }}-candycush-redis
+            ECS_SERVICE: ${{ github.event.inputs.environment }}-candycush-service-redis
+            ECS_CLUSTER: ${{ github.event.inputs.environment }}-candycush-cluster
+          - name: nginx
+            ecr_repo: ${{ github.event.inputs.environment }}-candycush-nginx
+            ECS_APP_CONTAINER_NAME: nginx
+            ECS_TASK_DEFINITION: ${{ github.event.inputs.environment }}-candycush-nginx
+            ECS_SERVICE: ${{ github.event.inputs.environment }}-candycush-service-nginx
+            ECS_CLUSTER: ${{ github.event.inputs.environment }}-candycush-cluster
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws_region }}
+
+  
+      - name: Download task definition for web
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ matrix.service.ECS_TASK_DEFINITION }} \
+          --query taskDefinition > task-definition.json
+          ls -l task-definition.json
+
+      - name: Fill in the new image ID for web in the Amazon ECS task definition
+        if: ${{ github.ref == 'refs/heads/main' }}
+        id: task-def-web
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ matrix.service.ECS_APP_CONTAINER_NAME }}
+          image: ${{ secrets.AWS_ACCOUNT }}.dkr.ecr.${{ env.aws_region }}.amazonaws.com/${{ matrix.service.ecr_repo }}:${{ github.sha }}
+
+      - name: Deploy app on Amazon ECS task definition
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def-web.outputs.task-definition }}
+          service: ${{ matrix.service.ECS_SERVICE }}
+          cluster: ${{ matrix.service.ECS_CLUSTER }}
+          wait-for-service-stability: false
