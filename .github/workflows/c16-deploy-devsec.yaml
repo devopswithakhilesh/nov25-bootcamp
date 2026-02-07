@@ -42,7 +42,7 @@ jobs:
             ecr_repo: ${{ github.event.inputs.environment }}-candycush-nginx
             path: ./class13-14/app/nginx/
             scan_enabled: true
-            scanning_type: os, library
+            scanning_type: [os, library]
 
     steps:
       - name: Checkout code
