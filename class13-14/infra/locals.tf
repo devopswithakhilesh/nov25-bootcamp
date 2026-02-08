@@ -7,8 +7,8 @@ locals {
     # each.value.name
     # each.value.image
     { name           = "flask"
-      cpu            = 256
-      memory         = 256
+      cpu            = 512
+      memory         = 512
       container_port = 8080
       # image               = ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.environment}-${var.app_name}-flask:latest
       container_name      = "flask"
@@ -26,8 +26,8 @@ locals {
 
     },
     { name           = "redis"
-      cpu            = 256
-      memory         = 256
+      cpu            = 512
+      memory         = 512
       container_port = 6379
       # image               = ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.environment}-${var.app_name}-redis:latest
       container_name      = "redis"
@@ -39,8 +39,8 @@ locals {
 
     },
     { name           = "nginx"
-      cpu            = 256
-      memory         = 256
+      cpu            = 512
+      memory         = 512
       container_port = 80
       tag            = "latest"
       # image               = ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${var.environment}-${var.app_name}-nginx:latest
