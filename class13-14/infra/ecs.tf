@@ -93,7 +93,10 @@ resource "aws_ecs_service" "app_service" {
     }
   }
 
-  depends_on = [aws_db_instance.default]
+  depends_on = [
+    aws_db_instance.default,
+    aws_ecs_task_definition.app
+  ]
 }
 
 
