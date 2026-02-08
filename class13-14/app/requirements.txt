@@ -13,3 +13,4 @@ pytz
 redis
 vine
 Werkzeug
+pytest

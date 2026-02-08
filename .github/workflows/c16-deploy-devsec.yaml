@@ -49,6 +49,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: setup python
+        if: ${{ matrix.service.name == 'flask' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: pytest
+        if: ${{ matrix.service.name == 'flask' }}
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r ./class13-14/app/requirements.txt
+          pytest ./class13-14/app/tests/
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v5.1.1
         with:
