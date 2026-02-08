@@ -22,4 +22,4 @@ terraform apply -var-file=vars/prod.tfvars
 
 # if kms key creation fail with name duplicate
 
-aws kms schedule-key-deletion --key-id <KeyId> --pending-window-in-days 0
+aws secretsmanager delete-secret --secret-id dev-candycush-db  --force-delete-without-recovery
